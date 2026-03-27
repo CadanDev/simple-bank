@@ -1,75 +1,62 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!doctype html>
+<html lang="pt-br">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Meu Projeto</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>API Test Runner</title>
+	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		<div class="container-fluid">
-			<a class="navbar-brand" href="#">Meu Site</a>
-		</div>
-	</nav>
+	<main class="container">
+		<h1>API Test Runner</h1>
 
-	<main>
-		<section class="container my-5">
-			<h1>Bem-vindo</h1>
-			<div class="row">
-				<div class="col-lg-6">
-					<div class="card mb-3">
-						<div class="card-body">
-							<h5 class="card-title">Testador de Endpoints</h5>
-							<form id="api-form">
-								<div class="mb-2">
-									<select id="http-method" class="form-select">
-										<option>GET</option>
-										<option>POST</option>
-										<option>PUT</option>
-										<option>DELETE</option>
-									</select>
-								</div>
-								<div class="mb-2">
-									<input id="api-base" class="form-control" placeholder="API base URL (ex: http://localhost:8001)" value="">
-								</div>
-								<div class="mb-2">
-									<input id="api-url" class="form-control" placeholder="/event or full URL" value="/event">
-								</div>
-								<div class="mb-2">
-									<textarea id="api-body" class="form-control" rows="6" placeholder='{"type":"deposit","destination":"100","amount":10}'></textarea>
-								</div>
-								<div class="d-flex gap-2">
-									<button class="btn btn-primary" id="send-btn" type="submit">Enviar</button>
-									<button class="btn btn-outline-secondary" type="button" id="preset-reset">Preset: Reset</button>
-									<button class="btn btn-outline-secondary" type="button" id="preset-balance">Preset: Balance</button>
-									<button class="btn btn-outline-secondary" type="button" id="preset-event">Preset: Event</button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-				<div class="col-lg-6">
-					<div class="card mb-3">
-						<div class="card-body">
-							<h5 class="card-title">Resposta</h5>
-							<div class="mb-2"><strong>Status / Cabeçalhos</strong></div>
-							<div id="api-headers" class="small mb-2"></div>
-							<div class="mb-2"><strong>Body</strong></div>
-							<pre id="api-response" class="bg-light p-2" style="max-height:400px;overflow:auto;"></pre>
-							<div id="message-log" class="mt-2"></div>
-						</div>
-					</div>
-				</div>
+		<section class="controls">
+			<div class="group">
+				<h2>Reset</h2>
+				<button id="btn-reset">POST /api/reset</button>
+			</div>
+
+			<div class="group">
+				<h2>Balance</h2>
+				<label>Account id: <input id="balance-id" value="1234"></label>
+				<button id="btn-balance">GET /api/balance</button>
+			</div>
+
+			<div class="group">
+				<h2>Deposit</h2>
+				<label>Destination: <input id="deposit-dest" value="100"></label>
+				<label>Amount: <input id="deposit-amount" type="number" value="10"></label>
+				<button id="btn-deposit">POST /api/event (deposit)</button>
+			</div>
+
+			<div class="group">
+				<h2>Withdraw</h2>
+				<label>Origin: <input id="withdraw-origin" value="100"></label>
+				<label>Amount: <input id="withdraw-amount" type="number" value="5"></label>
+				<button id="btn-withdraw">POST /api/event (withdraw)</button>
+			</div>
+
+			<div class="group">
+				<h2>Transfer</h2>
+				<label>Origin: <input id="transfer-origin" value="100"></label>
+				<label>Destination: <input id="transfer-dest" value="300"></label>
+				<label>Amount: <input id="transfer-amount" type="number" value="15"></label>
+				<button id="btn-transfer">POST /api/event (transfer)</button>
+			</div>
+
+			<div class="group">
+				<h2>Requests</h2>
+				<button id="btn-run-sequence">Run sequence from spec</button>
 			</div>
 		</section>
+
+		<section class="output">
+			<h2>Resposta</h2>
+			<div id="response-meta" class="meta">Status: -</div>
+			<pre id="response-body">{ }</pre>
+		</section>
+
 	</main>
-
-	<footer class="bg-dark text-white text-center py-4">
-		<p>&copy; 2026 Lucas Gabriel Cadan</p>
-	</footer>
-
 	<script src="main.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

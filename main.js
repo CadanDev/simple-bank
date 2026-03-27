@@ -1,105 +1,76 @@
-const API_ENDPOINTS = [
-	{
-		name: 'reset',
-		url: '/reset',
-		method: 'POST'
-	},
-	{
-		name: 'getBalance',
-		url: '/balance',
-		method: 'GET'
-	},
-	{
-		name: 'event',
-		url: '/event',
-		method: 'POST'
+function showResponse(status, bodyText) {
+	document.getElementById('response-meta').textContent = 'Status: ' + status;
+	try {
+		const json = JSON.parse(bodyText);
+		document.getElementById('response-body').textContent = JSON.stringify(json, null, 2);
+	} catch (e) {
+		document.getElementById('response-body').textContent = bodyText;
 	}
-]
-const logElement = document.getElementById('message-log');
-
-const logger = (message, level) => {
-	if(logElement) {
-		const logEntry = document.createElement('div');
-		logEntry.textContent = `[${level.toUpperCase()}] ${message}`;
-		logEntry.className = level;
-		logElement.appendChild(logEntry);
-		setTimeout(() => {
-			logEntry.remove();
-		}, 2000);
-	}
-	console[level](message);
 }
 
-const api = async (endpoint, method, data) => {
-	const url = API_ENDPOINTS.find(e => e.name === endpoint).url
-	const options = {
-		method,
-		headers: {
-			'Content-Type': 'application/json'
-		}
+async function doRequest(method, url, body) {
+	const opts = { method, headers: {} };
+	if (body !== undefined) {
+		opts.headers['Content-Type'] = 'application/json';
+		opts.body = JSON.stringify(body);
 	}
-	if (data) {
-		options.body = JSON.stringify(data)
-	}
-	const response = await fetch(url, options)
-	return response.json()
+	const res = await fetch(url, opts);
+	const text = await res.text();
+	showResponse(res.status, text);
+	return { status: res.status, body: text };
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-	const form = document.getElementById('api-form');
-	const methodInput = document.getElementById('http-method');
-	const urlInput = document.getElementById('api-url');
-	const baseInput = document.getElementById('api-base');
-	const bodyInput = document.getElementById('api-body');
-	const responsePre = document.getElementById('api-response');
-	const headersDiv = document.getElementById('api-headers');
-
-	form.addEventListener('submit', async (e) => {
-		e.preventDefault();
-		const method = methodInput.value;
-		let url = urlInput.value;
-		const base = (baseInput && baseInput.value.trim()) ? baseInput.value.trim().replace(/\/$/, '') : '';
-		if (!url.match(/^https?:\/\//) && base) {
-			url = base + (url.startsWith('/') ? url : '/' + url);
-		}
-		const options = { method, headers: {} };
-		if (method !== 'GET' && bodyInput.value.trim()) {
-			options.headers['Content-Type'] = 'application/json';
-			options.body = bodyInput.value;
-		}
-
-		try {
-			const res = await fetch(url, options);
-			const statusLine = `${res.status} ${res.statusText}`;
-			const contentType = res.headers.get('content-type') || '';
-			let bodyText = '';
-			if (contentType.includes('application/json')) {
-				const json = await res.json();
-				bodyText = JSON.stringify(json, null, 2);
-			} else {
-				bodyText = await res.text();
-			}
-			responsePre.textContent = bodyText;
-			headersDiv.innerHTML = `<div><strong>${statusLine}</strong></div>`;
-			res.headers.forEach((value, key) => {
-				const d = document.createElement('div');
-				d.textContent = `${key}: ${value}`;
-				headersDiv.appendChild(d);
-			});
-			logger(`${method} ${url} -> ${statusLine}`, 'info');
-		} catch (err) {
-			responsePre.textContent = err.toString();
-			logger(err.toString(), 'error');
-		}
-	});
-
-	document.getElementById('preset-reset')?.addEventListener('click', () => {
-		methodInput.value = 'POST'; urlInput.value = '/reset'; bodyInput.value = '';
-	});
-	document.getElementById('preset-balance')?.addEventListener('click', () => {
-		methodInput.value = 'GET'; urlInput.value = '/balance?account_id=100'; bodyInput.value = '';
-	});
-	document.getElementById('preset-event')?.addEventListener('click', () => {
-		methodInput.value = 'POST'; urlInput.value = '/event'; bodyInput.value = JSON.stringify({ type: 'deposit', destination: '100', amount: 10 }, null, 2);
-	});
+document.getElementById('btn-reset').addEventListener('click', () => {
+	doRequest('POST', '/api/reset');
 });
+
+document.getElementById('btn-balance').addEventListener('click', () => {
+	const id = document.getElementById('balance-id').value;
+	doRequest('GET', '/api/balance?account_id=' + encodeURIComponent(id));
+});
+
+document.getElementById('btn-deposit').addEventListener('click', () => {
+	const dest = document.getElementById('deposit-dest').value;
+	const amount = parseInt(document.getElementById('deposit-amount').value || '0', 10);
+	doRequest('POST', '/api/event', { type: 'deposit', destination: dest, amount });
+});
+
+document.getElementById('btn-withdraw').addEventListener('click', () => {
+	const origin = document.getElementById('withdraw-origin').value;
+	const amount = parseInt(document.getElementById('withdraw-amount').value || '0', 10);
+	doRequest('POST', '/api/event', { type: 'withdraw', origin, amount });
+});
+
+document.getElementById('btn-transfer').addEventListener('click', () => {
+	const origin = document.getElementById('transfer-origin').value;
+	const destination = document.getElementById('transfer-dest').value;
+	const amount = parseInt(document.getElementById('transfer-amount').value || '0', 10);
+	doRequest('POST', '/api/event', { type: 'transfer', origin, destination, amount });
+});
+
+document.getElementById('btn-run-sequence').addEventListener('click', async () => {
+	// Executa a sequência de testes do enunciado
+	const seq = [
+		{ fn: () => doRequest('POST', '/api/reset') },
+		{ fn: () => doRequest('GET', '/api/balance?account_id=1234') },
+		{ fn: () => doRequest('POST', '/api/event', { type: 'deposit', destination: '100', amount: 10 }) },
+		{ fn: () => doRequest('POST', '/api/event', { type: 'deposit', destination: '100', amount: 10 }) },
+		{ fn: () => doRequest('GET', '/api/balance?account_id=100') },
+		{ fn: () => doRequest('POST', '/api/event', { type: 'withdraw', origin: '200', amount: 10 }) },
+		{ fn: () => doRequest('POST', '/api/event', { type: 'withdraw', origin: '100', amount: 5 }) },
+		{ fn: () => doRequest('POST', '/api/event', { type: 'transfer', origin: '100', amount: 15, destination: '300' }) },
+		{ fn: () => doRequest('POST', '/api/event', { type: 'transfer', origin: '200', amount: 15, destination: '300' }) }
+	];
+
+	for (const step of seq) {
+		// aguarda cada request para facilitar inspeção
+		// eslint-disable-next-line no-await-in-loop
+		await step.fn();
+		// pequena pausa
+		// eslint-disable-next-line no-await-in-loop
+		await new Promise(r => setTimeout(r, 300));
+	}
+});
+
+// Fallback: show simple greeting if loaded directly
+showResponse('-', '{ "ready": true }');
