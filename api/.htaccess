@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /ebanx/api/
+
+    # garante que request pra arquivos reais sejam entregues
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # todas as rotas REST vão para index.php
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
