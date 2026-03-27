@@ -1,7 +1,7 @@
 <?php
 
 namespace Api\Controllers;
-use Api\Storage\Accounts;
+use Api\Models\Accounts;
 use App\Logger\Logger;
 
 class BalanceController
@@ -30,7 +30,7 @@ class BalanceController
 			$logger->info("BalanceController: returned balance for account {$accountId}");
 			return intval($balance);
 		} catch (\Throwable $e) {
-			$logger->error('BalanceController exception: ' . $e->getMessage());
+			$logger->error("BalanceController exception: {$e->getMessage()}");
 			http_response_code(500);
 			return ['error' => 'internal error'];
 		}

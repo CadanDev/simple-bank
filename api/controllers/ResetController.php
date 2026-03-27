@@ -2,7 +2,7 @@
 
 namespace Api\Controllers;
 
-use Api\Storage\Accounts;
+use Api\Models\Accounts;
 use App\Logger\Logger;
 
 class ResetController
@@ -13,12 +13,12 @@ class ResetController
 		try {
 			$storage = new Accounts();
 			$logger->info('ResetController: deleting all accounts');
-			$storage->deleteAll();
-			$logger->info('ResetController: deleteAll completed');
+			$storage->resetAll();
+			$logger->info('ResetController: resetAll completed');
 			http_response_code(200);
 			return ['status' => 'ok'];
 		} catch (\Throwable $e) {
-			$logger->error('ResetController exception: ' . $e->getMessage());
+			$logger->error("ResetController exception: {$e->getMessage()}");
 			http_response_code(500);
 			return ['error' => 'internal error'];
 		}

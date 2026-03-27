@@ -1,11 +1,26 @@
 function showResponse(status, bodyText) {
-	document.getElementById('response-meta').textContent = 'Status: ' + status;
+	const list = document.getElementById('response-list');
+	if (!list) return;
+	const entry = document.createElement('div');
+	entry.className = 'response-entry';
+
+	const meta = document.createElement('div');
+	meta.className = 'meta';
+	meta.textContent = 'Status: ' + status;
+
+	const pre = document.createElement('pre');
 	try {
 		const json = JSON.parse(bodyText);
-		document.getElementById('response-body').textContent = JSON.stringify(json, null, 2);
+		pre.textContent = JSON.stringify(json, null, 2);
 	} catch (e) {
-		document.getElementById('response-body').textContent = bodyText;
+		pre.textContent = bodyText;
 	}
+
+	entry.appendChild(meta);
+	entry.appendChild(pre);
+	list.appendChild(entry);
+	// scroll to newest
+	list.scrollTop = list.scrollHeight;
 }
 
 async function doRequest(method, url, body) {
