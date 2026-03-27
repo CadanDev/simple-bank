@@ -1,0 +1,42 @@
+.some {
+	opacity: 0;
+}
+/* ELEMENTO DE MENSAGENS DE RESPOSTA */
+.message-log {
+	transition: opacity 0.5s ease-in-out;
+
+	&.active {
+		opacity: 1;
+	}
+
+	&.error {
+		background-color: #f8d7da;
+		color: #721c24;
+		border: 1px solid #f5c6cb;
+		padding: 12px;
+		border-radius: 4px;
+		margin-bottom: 10px;
+	}
+
+	&.success {
+		background-color: #d4edda;
+		color: #155724;
+		border: 1px solid #c3e6cb;
+		padding: 12px;
+		border-radius: 4px;
+		margin-bottom: 10px;
+	}
+
+	&.info {
+		background-color: #d1ecf1;
+		color: #0c5460;
+		border: 1px solid #bee5eb;
+		padding: 12px;
+		border-radius: 4px;
+		margin-bottom: 10px;
+	}
+}
+
+.some {
+	opacity: 0;
+}
