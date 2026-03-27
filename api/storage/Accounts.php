@@ -4,11 +4,11 @@ namespace Api\Storage;
 
 class Accounts
 {
-	private $accounts;
+	private static array $accounts;
 
 	public function __construct()
 	{
-		$this->accounts = [
+		self::$accounts = [
 			"100" => ["balance" => 10],
 			"200" => ["balance" => 20]
 		];
@@ -16,22 +16,22 @@ class Accounts
 
 	public function all(): array
 	{
-		return $this->accounts;
+		return self::$accounts;
 	}
 
 	public function get(string $id)
 	{
-		return array_key_exists($id, $this->accounts) ? $this->accounts[$id] : null;
+		return array_key_exists($id, self::$accounts) ? self::$accounts[$id] : null;
 	}
 
 	public function set(string $id, int $balance): int
 	{
-		$this->accounts[$id] = intval($balance);
-		return $this->accounts[$id];
+		self::$accounts[$id] = intval($balance);
+		return self::$accounts[$id];
 	}
 
 	public function deleteAll(): void
 	{
-		$this->accounts = [];
+		self::$accounts = [];
 	}
 }
