@@ -10,7 +10,7 @@ class Logger
 
 	public function __construct()
 	{
-		$this->logsDir = __DIR__ . '/../../logs';
+		$this->logsDir = __DIR__ . '/../logs';
 		$this->ensureLogsDirectory();
 		$this->logFile = $this->logsDir . '/' . date('Y-m-d') . '.log';
 	}
