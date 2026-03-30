@@ -1,6 +1,26 @@
 <?php
-
 use Api\Controllers\ApiController;
+
+// Show all errors during development to diagnose 500 responses
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
+// Shutdown handler to catch fatal errors and return a JSON payload
+register_shutdown_function(function () {
+	$err = error_get_last();
+	if ($err !== null) {
+		http_response_code(500);
+		header('Content-Type: application/json');
+		echo json_encode([
+			'error' => 'Fatal error',
+			'message' => $err['message'] ?? null,
+			'file' => $err['file'] ?? null,
+			'line' => $err['line'] ?? null,
+		]);
+	}
+});
+
 
 /**
  * Simple autoloader for Api and App namespaces
@@ -34,3 +54,5 @@ require_once __DIR__ . '/config/session.php';
 
 $controller = new ApiController();
 $controller->handleRequest();
+echo json_encode(['status' => 'success', 'message' => 'Request processed']);
+?>
