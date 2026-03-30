@@ -70,4 +70,24 @@ class Accounts
 		$this->accounts = [];
 		$this->persist();
 	}
+
+	public function transfer(string $originId, string $destinationId, int $amount): bool
+	{
+		$originBalance = $this->get($originId);
+		$destinationBalance = $this->get($destinationId) ?? 0;
+		try {
+			if ($originBalance === null || $originBalance < $amount) {
+				return false;
+			}
+
+			$this->set($originId, $originBalance - $amount);
+			$this->set($destinationId, $destinationBalance + $amount);
+			return true;
+		} catch (\Throwable $e) {
+			// Rollback in case of any error
+			$this->set($originId, $originBalance);
+			$this->set($destinationId, $destinationBalance);
+			return false;
+		}
+	}
 }
