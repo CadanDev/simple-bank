@@ -16,7 +16,7 @@ class ResetController
 			$storage->resetAll();
 			$logger->info('ResetController: resetAll completed');
 			http_response_code(200);
-			return true;
+			return [];
 		} catch (\Throwable $e) {
 			$logger->error("ResetController exception: {$e->getMessage()}");
 			http_response_code(500);
