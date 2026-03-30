@@ -12,7 +12,13 @@ class ApiController
 	public function __construct()
 	{
 		$this->logger = new Logger();
-		$this->routes = require_once __DIR__ . '/../config/api.php';
+		$routes = require __DIR__ . '/../config/api.php';
+		if (!is_array($routes)) {
+			$this->logger->warning('ApiController: config/api.php did not return an array, using empty routes');
+			$this->routes = [];
+		} else {
+			$this->routes = $routes;
+		}
 	}
 	/**
 	 * Handle incoming HTTP requests, route them to the appropriate controller, and return the response.
