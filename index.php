@@ -28,11 +28,18 @@ register_shutdown_function(function () {
 spl_autoload_register(function ($class) {
 	$baseDir = __DIR__ . '/';
 	if (strpos($class, 'Api\\') === 0) {
-		$rel = str_replace('\\', '/', substr($class, strlen('Api\\')));
-		$file = $baseDir . $rel . '.php';
-		if (file_exists($file)) {
-			require_once $file;
-		}
+			$rel = str_replace('\\', '/', substr($class, strlen('Api\\')));
+			// Map top-level Api namespace segments to lowercase folder names
+			// e.g. Api\Controllers\ApiController -> controllers/ApiController.php
+			$parts = explode('/', $rel);
+			if (count($parts) > 0) {
+				$parts[0] = strtolower($parts[0]);
+			}
+			$relFixed = implode('/', $parts);
+			$file = $baseDir . $relFixed . '.php';
+			if (file_exists($file)) {
+				require_once $file;
+			}
 	}
 	if (strpos($class, 'App\\') === 0) {
 		$rel = str_replace('\\', '/', substr($class, strlen('App\\')));
