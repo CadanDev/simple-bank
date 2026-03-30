@@ -1,10 +1,25 @@
 <?php
 use Api\Controllers\ApiController;
 
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
+$config = require_once __DIR__ . '/../config/api.php';
 
+/**
+ * Initialize error reporting for development.
+ * In production, these settings should be adjusted to log errors instead of displaying them.
+ */
+if($config['environment'] === 'dev') {
+	ini_set('display_errors', '1');
+	ini_set('display_startup_errors', '1');
+	error_reporting(E_ALL);
+} else {
+	ini_set('display_errors', '0');
+	error_reporting(0);
+}
+
+/**
+ * Register a shutdown function to catch fatal errors and return a JSON response.
+ * This ensures that even if a fatal error occurs, the client receives a structured error message.
+ */
 register_shutdown_function(function () {
 	$err = error_get_last();
 	if ($err !== null) {
@@ -19,39 +34,7 @@ register_shutdown_function(function () {
 	}
 });
 
-
-/**
- * Simple autoloader for Api and App namespaces
- */
-spl_autoload_register(function ($class) {
-	$baseDir = __DIR__ . '/';
-	if (strpos($class, 'Api\\') === 0) {
-			$rel = str_replace('\\', '/', substr($class, strlen('Api\\')));
-			$parts = explode('/', $rel);
-			if (count($parts) > 0) {
-				$parts[0] = strtolower($parts[0]);
-			}
-			$relFixed = implode('/', $parts);
-			$file = $baseDir . $relFixed . '.php';
-			if (file_exists($file)) {
-				require_once $file;
-			}
-	}
-	if (strpos($class, 'App\\') === 0) {
-		$rel = str_replace('\\', '/', substr($class, strlen('App\\')));
-		$file = $baseDir . 'app/' . $rel . '.php';
-		if (file_exists($file)) {
-			require_once $file;
-		} else {
-			$basename = basename($rel);
-			$fallback = $baseDir . 'app/' . $basename . '.php';
-			if (file_exists($fallback)) {
-				require_once $fallback;
-			}
-		}
-	}
-});
-
+require_once __DIR__ . '/autoload.php';
 require_once __DIR__ . '/config/session.php';
 
 $controller = new ApiController();

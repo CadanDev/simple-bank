@@ -20,7 +20,7 @@ class ResetController
 		} catch (\Throwable $e) {
 			$logger->error("ResetController exception: {$e->getMessage()}");
 			http_response_code(500);
-			return ["INTERNAL ERROR"];
+			return 'Error resetting accounts';
 		}
 	}
 }
