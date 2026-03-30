@@ -70,24 +70,66 @@ class Accounts
 		$this->accounts = [];
 		$this->persist();
 	}
-
+	/**
+	 * Perform a transfer between two accounts atomically.
+	 * @param string $originId The ID of the origin account
+	 * @param string $destinationId The ID of the destination account
+	 * @param int $amount The amount to transfer
+	 * @return bool True if the transfer was successful, false otherwise
+	 */
 	public function transfer(string $originId, string $destinationId, int $amount): bool
 	{
-		$originBalance = $this->get($originId);
-		$destinationBalance = $this->get($destinationId) ?? 0;
+		$lockPath = self::STORAGE_FILE . '.lock';
+		$lockFp = @fopen($lockPath, 'cb');
+		if ($lockFp === false) {
+			return false;
+		}
+
+		if (!flock($lockFp, LOCK_EX)) {
+			fclose($lockFp);
+			return false;
+		}
+
 		try {
+			$accounts = [];
+			if (file_exists(self::STORAGE_FILE)) {
+				$raw = @file_get_contents(self::STORAGE_FILE);
+				$data = json_decode($raw, true);
+				if (is_array($data)) {
+					$accounts = $data;
+				}
+			}
+
+			$originBalance = array_key_exists($originId, $accounts) ? intval($accounts[$originId]) : null;
+			$destinationBalance = array_key_exists($destinationId, $accounts) ? intval($accounts[$destinationId]) : 0;
+
 			if ($originBalance === null || $originBalance < $amount) {
 				return false;
 			}
 
-			$this->set($originId, $originBalance - $amount);
-			$this->set($destinationId, $destinationBalance + $amount);
+			$accounts[$originId] = $originBalance - $amount;
+			$accounts[$destinationId] = $destinationBalance + $amount;
+
+			$payload = json_encode($accounts);
+			if ($payload === false) {
+				return false;
+			}
+
+			$tmp = self::STORAGE_FILE . '.tmp';
+			if (@file_put_contents($tmp, $payload) === false) {
+				return false;
+			}
+
+			if (!@rename($tmp, self::STORAGE_FILE)) {
+				@unlink($tmp);
+				return false;
+			}
+
+			$this->accounts = $accounts;
 			return true;
-		} catch (\Throwable $e) {
-			// Rollback in case of any error
-			$this->set($originId, $originBalance);
-			$this->set($destinationId, $destinationBalance);
-			return false;
+		} finally {
+			flock($lockFp, LOCK_UN);
+			fclose($lockFp);
 		}
 	}
 }
