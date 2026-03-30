@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * Simple autoloader for Api and App namespaces
  * This allows us to automatically include class files based on their namespace and class name.

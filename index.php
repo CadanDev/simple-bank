@@ -1,7 +1,7 @@
 <?php
 use Api\Controllers\ApiController;
 
-$config = require_once __DIR__ . '/../config/api.php';
+$config = require_once __DIR__ . '/config/api.php';
 
 /**
  * Initialize error reporting for development.
