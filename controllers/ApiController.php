@@ -32,8 +32,29 @@ class ApiController
 			}
 			$route = $path;
 
-			if (array_key_exists($route, $this->routes)) {
-				$controllerClass = $this->routes[$route];
+			// Allow routes to be matched with or without the '/api' prefix.
+			// Try the requested path first, then the alternative (add/remove '/api').
+			$candidates = [$route];
+			if (strpos($route, '/api') === 0) {
+				$stripped = substr($route, 4);
+				if ($stripped === '') {
+					$stripped = '/';
+				}
+				$candidates[] = $stripped;
+			} else {
+				$candidates[] = '/api' . ($route === '/' ? '' : $route);
+			}
+
+			$matched = null;
+			foreach ($candidates as $r) {
+				if (array_key_exists($r, $this->routes)) {
+					$matched = $r;
+					break;
+				}
+			}
+
+			if ($matched !== null) {
+				$controllerClass = $this->routes[$matched];
 				if (is_string($controllerClass) && !class_exists($controllerClass)) {
 					header('Content-Type: application/json');
 					echo json_encode(['message' => $controllerClass]);
