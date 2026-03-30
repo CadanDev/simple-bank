@@ -4,53 +4,60 @@ namespace Api\Models;
 
 /**
  * Class Accounts
- * Session-based storage for accounts and balances.
- * Uses PHP session to persist data across HTTP requests.
+ * File-based storage for accounts and balances.
+ * Persists state across requests regardless of client cookies.
  */
 class Accounts
 {
-	private const SESSION_KEY = 'accounts';
+	private const STORAGE_DIR = __DIR__ . '/../../data';
+	private const STORAGE_FILE = self::STORAGE_DIR . '/accounts.json';
 	private array $accounts;
 
 	public function __construct()
 	{
-		if (session_status() !== PHP_SESSION_ACTIVE) {
-			throw new \RuntimeException('Session must be started before using Accounts model');
+		// Ensure storage directory exists
+		if (!is_dir(self::STORAGE_DIR)) {
+			@mkdir(self::STORAGE_DIR, 0777, true);
 		}
 
-		$this->accounts = $_SESSION[self::SESSION_KEY] ?? [];
+		// Load existing data if present
+		$this->accounts = [];
+		if (file_exists(self::STORAGE_FILE)) {
+			$raw = @file_get_contents(self::STORAGE_FILE);
+			$data = json_decode($raw, true);
+			if (is_array($data)) {
+				$this->accounts = $data;
+			}
+		}
 	}
 
 	private function persist(): void
 	{
-		$_SESSION[self::SESSION_KEY] = $this->accounts;
+		$tmp = self::STORAGE_FILE . '.tmp';
+		$fp = @fopen($tmp, 'wb');
+		if ($fp === false) {
+			return;
+		}
+		// Acquire exclusive lock while writing
+		if (flock($fp, LOCK_EX)) {
+			fwrite($fp, json_encode($this->accounts));
+			fflush($fp);
+			flock($fp, LOCK_UN);
+		}
+		fclose($fp);
+		@rename($tmp, self::STORAGE_FILE);
 	}
 
-	/**
-	 * Returns all accounts and their balances
-	 * @return array
-	 */
 	public function all(): array
 	{
 		return $this->accounts;
 	}
 
-	/**
-	 * Returns the balance of the account with the given id, or null if it doesn't exist
-	 * @param string $id
-	 * @return int|null
-	 */
 	public function get(string $id): ?int
 	{
 		return array_key_exists($id, $this->accounts) ? intval($this->accounts[$id]) : null;
 	}
 
-	/**
-	 * Sets the balance of the account with the given id, creating it if it doesn't exist
-	 * @param string $id
-	 * @param int $balance
-	 * @return int the new balance of the account
-	 */
 	public function set(string $id, int $balance): int
 	{
 		$this->accounts[$id] = intval($balance);
@@ -58,10 +65,6 @@ class Accounts
 		return $this->accounts[$id];
 	}
 
-	/**
-	 * Deletes all accounts and resets to the initial state
-	 * @return void
-	 */
 	public function resetAll(): void
 	{
 		$this->accounts = [];
