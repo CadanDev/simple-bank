@@ -1,21 +1,19 @@
-RewriteEngine On
-
-# If the request is for an existing file or directory, serve it directly
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
-
-# Otherwise rewrite to index.php (preserve query string)
-RewriteRule ^ index.php [QSA,L]
 <IfModule mod_rewrite.c>
+    # Ativa rewrite uma única vez
     RewriteEngine On
-    RewriteBase /ebanx/api/
 
-    # garante que request pra arquivos reais sejam entregues
+    # Se a aplicação estiver em subpasta, ajuste o RewriteBase (ex: /ebanx/api/)
+    RewriteBase /
+
+    # Se o pedido é um ficheiro ou diretório real, serve diretamente
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # todas as rotas REST vão para index.php
-    RewriteRule ^(.*)$ index.php [QSA,L]
+    # Caso contrário, encaminha tudo para index.php preservando query string
+    RewriteRule ^ index.php [L,QSA]
 </IfModule>
+
+# Nota: o bloco <IfModule mod_php7.c> e handlers PHP costumam ser desnecessários
+# em hosts modernos (Hostinger) e podem conflitar. Se precisar forçar handler,
+# adicione apenas uma vez e com cuidado.

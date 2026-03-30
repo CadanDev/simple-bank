@@ -20,6 +20,16 @@ class ApiController
 		try {
 			$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 			$path = parse_url($requestUri, PHP_URL_PATH);
+			// Remove base folder (if app is hosted in a subdirectory) so routes
+			// defined like '/api/teste' match regardless of the public path.
+			$scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+			$baseDir = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
+			if ($baseDir !== '' && strpos($path, $baseDir) === 0) {
+				$path = substr($path, strlen($baseDir));
+				if ($path === '') {
+					$path = '/';
+				}
+			}
 			$route = $path;
 
 			if (array_key_exists($route, $this->routes)) {

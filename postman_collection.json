@@ -1,0 +1,151 @@
+{
+  "info": {
+    "name": "Simple Bank API",
+    "_postman_id": "simple-bank-collection",
+    "description": "Coleção para testar as rotas da API Simple Bank",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET /api/teste",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/teste",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "teste"
+          ]
+        }
+      }
+    },
+    {
+      "name": "GET /api/balance",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/balance?account_id=100",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "balance"
+          ],
+          "query": [
+            {
+              "key": "account_id",
+              "value": "100"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "POST /api/event - Deposit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"deposit\",\n  \"destination\": \"100\",\n  \"amount\": 10\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/event",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "event"
+          ]
+        }
+      }
+    },
+    {
+      "name": "POST /api/event - Withdraw",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"withdraw\",\n  \"origin\": \"100\",\n  \"amount\": 5\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/event",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "event"
+          ]
+        }
+      }
+    },
+    {
+      "name": "POST /api/event - Transfer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"transfer\",\n  \"origin\": \"100\",\n  \"destination\": \"200\",\n  \"amount\": 15\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/event",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "event"
+          ]
+        }
+      }
+    },
+    {
+      "name": "POST /api/reset",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/reset",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "reset"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    }
+  ]
+}

@@ -61,5 +61,4 @@ require_once __DIR__ . '/config/session.php';
 
 $controller = new ApiController();
 $controller->handleRequest();
-echo json_encode(['status' => 'success', 'message' => 'Request processed']);
 ?>
