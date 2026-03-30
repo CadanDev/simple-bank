@@ -14,14 +14,16 @@ class ApiController
 		$this->logger = new Logger();
 		$this->routes = require_once __DIR__ . '/../config/api.php';
 	}
-
+	/**
+	 * Handle incoming HTTP requests, route them to the appropriate controller, and return the response.
+	 * This method processes the request URI, matches it against defined routes, and invokes the corresponding controller's index method.
+	 * It also handles errors and returns appropriate HTTP status codes and responses.
+	 */
 	public function handleRequest(): void
 	{
 		try {
 			$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 			$path = parse_url($requestUri, PHP_URL_PATH);
-			// Remove base folder (if app is hosted in a subdirectory) so routes
-			// defined like '/api/teste' match regardless of the public path.
 			$scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 			$baseDir = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
 			if ($baseDir !== '' && strpos($path, $baseDir) === 0) {
@@ -32,8 +34,6 @@ class ApiController
 			}
 			$route = $path;
 
-			// Allow routes to be matched with or without the '/api' prefix.
-			// Try the requested path first, then the alternative (add/remove '/api').
 			$candidates = [$route];
 			if (strpos($route, '/api') === 0) {
 				$stripped = substr($route, 4);
@@ -61,8 +61,13 @@ class ApiController
 				} else {
 					$controller = new $controllerClass();
 					$response = $controller->index();
-					header('Content-Type: application/json');
-					echo json_encode($response);
+					if (is_array($response) || is_object($response)) {
+						header('Content-Type: application/json');
+						echo json_encode($response);
+					} else {
+						header('Content-Type: text/plain; charset=utf-8');
+						echo (string) $response;
+					}
 				}
 			} else {
 				$this->logger->warning("Route not found: $route");
